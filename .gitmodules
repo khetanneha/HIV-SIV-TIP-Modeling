@@ -1,0 +1,3 @@
+[submodule "Viral-TIP-modeling/HIV-Bioreactor/Viral_TIP-modeling/HIV-Bioreactor/BioreactorModeling"]
+	path = Viral-TIP-modeling/HIV-Bioreactor/Viral_TIP-modeling/HIV-Bioreactor/BioreactorModeling
+	url = git@github.com:khetanneha/BioreactorModeling.git
