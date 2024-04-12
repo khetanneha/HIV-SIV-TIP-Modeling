@@ -1,1 +1,1 @@
-#Predicting efficacy of TIPs in humans
+# Predicting the efficacy of TIPs in humans
