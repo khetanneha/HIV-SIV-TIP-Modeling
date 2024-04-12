@@ -2,5 +2,5 @@
 
 
 
-Design criterion for amplification of spontaneously emerged DIPs in an evolutionary experimental scheme ( Bioreactor )
+Design criterion for amplification of spontaneously emerged DIPs in an evolutionary Bioreactor experimental 
 
