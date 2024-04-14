@@ -2,10 +2,14 @@
 Neha Khetan, Oct 2022 -  Dec,2023
 Model parameterization of Viral kinetics from
 rhesus macaques: SHIV infected [ Control Group ]
-and TIP-treated [ Treated Group ]
+and SHIV infected + TIP-treated [ Treated Group ]
 
-Usage: python run_mcmc_infanttips.py AnimalNo NumIndependentRuns OutputFolder_plots OutputFolder_files
+This is the main file that needs to be executed
+Usage: 
+	python run_mcmc_infanttips.py AnimalNo NumIndependentRuns OutputFolder_plots OutputFolder_files
 '''
+
+
 
 import emcee
 import corner
@@ -42,6 +46,8 @@ TIP 7:  immature virions that do not infect: with and w/o feedback on infectivit
 
 
 def main( p0 ,nwalkers, niter,  ndim,  lnprob,  data , numRun ):
+	"""Main mcmc module 
+	"""
 
 	OutFname = OPATH_files + 'back_' + str( numRun ) + '.hdf5'
 	backEnd = emcee.backends.HDFBackend(  OutFname , name='mcmc', read_only=False, dtype=None, compression=None, compression_opts=None)
@@ -50,18 +56,15 @@ def main( p0 ,nwalkers, niter,  ndim,  lnprob,  data , numRun ):
 	sampler = emcee.EnsembleSampler( nwalkers, ndim, lnprob  , backend = backEnd , args=data  )
 	print("Running burn-in...")
 	p0, _, _ = sampler.run_mcmc( p0, numBurn , progress=True)
-	#sampler.reset()
 	print("Running production...")
 	pos, prob, state = sampler.run_mcmc( p0 , niter, progress=True )	
 	print("Mean acceptance fraction: {0:.3f}".format( np.mean(sampler.acceptance_fraction)))
 	return sampler, pos, prob, state 
 
 
-
-
-
-# param in time
 def plot_thetaHist( sam , numRun , varNo ):
+	"""plots parameter explored in successive steps
+	"""
 	ss = sam.get_chain( flat= True )
 	f10 , ax10 = plt.subplots(  varNo , 1 , figsize=( 12 , 10 ) )
 	for fh in range( 0 , varNo ):
@@ -73,11 +76,13 @@ def plot_thetaHist( sam , numRun , varNo ):
 	plt.close()
 	
 
-
-
-
-
 def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
+	"""Prepares and execute  MCMC: 
+		1. Prepares experiment data 
+		2. Initial conditions based on #1
+		3. Initialize parameter-guess sets for walkers
+		4. Invoke actual-mcmc-run"""
+
 	nR , nC =  AllDat.shape 
 	ylab    = AllDat.columns.values.tolist()[1:]
 	print( "Sample #:", samNo , "Run #:" , numRun )	
@@ -94,7 +99,6 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 		yy[0] = 2*ViralT0 #LOD_siv # vRNA
 
 	else:
-
 		#print( backGrnd[0] , backGrnd[1] )
 		# For. start norm
 		if ( backGrnd[1] > LOD_siv ):
@@ -103,10 +107,7 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 		indx  = yy[:] < LOD_siv
 		if (indx.any() ):
 			yy[ indx ] = LOD_siv
-		yy[0] = 2*ViralT0 #LOD_siv # vRNA
-		
-
-
+		yy[0] = 2*ViralT0 #LOD_siv # vRNA	
 	eXY = np.column_stack( (xx , yy ))  
 	data = ( xx , yy , yerr )  
 
@@ -124,30 +125,19 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 			indx2   = ytip[:] < LOD_tip
 			if (indx2.any() ):
 				ytip[ indx2 ] = LOD_tip
-		#plt.semilogy( xtip , ytip )
-		#plt.show()
 		eXY_tip = np.column_stack( (xtip , ytip ))
 
-	#print( eXY )
-	#print( "tip:", eXY_tip[0,:] )	
 	# ========================================
 	initial_theta   = np.array( ModelObj.params )
 	ndim            = len( initial_theta )
 	iv0             = ModelObj.get_AllIV( )
-    # ==================================================
+   
 	intgdTIP        = ExpData.get_dataInfantIntegratedTIP( datatype , ExpData.Animal2ExcludeInfant( datatype ) )
-	intgdTIPSam     = intgdTIP.iloc[  0 , samNo  ]
-	#print( "......................" , intgdTIPSam ) 
+	intgdTIPSam     = intgdTIP.iloc[  0 , samNo  ]	
+	iv              = ModelObj.set_AllIV(  V0=ViralT0 , VT0=0 , IT10=intgdTIPSam ,  TotalT0=PARAM.TotalT0 ) # 
 
-
-	
-	# ICs:
-	#iv                  = ModelObj.set_AllIV(  V0=ViralT0 , VT0=0 , IT10=2.5*10**4 ,  TotalT0=TotalT0 ) # 
-	#iv                  = ModelObj.set_AllIV(  V0=ViralT0 , VT0=0 , IT10=0.5*eXY_tip[0,1] ,  TotalT0=TotalT0 ) # 
-	iv                   = ModelObj.set_AllIV(  V0=ViralT0 , VT0=0 , IT10=intgdTIPSam ,  TotalT0=PARAM.TotalT0 ) # 
-
-
-	p0              = np.empty((nwalkers, ndim))
+	# ==================================================
+	p0              = np.empty(( nwalkers, ndim ))
 	p0[:,0] 		= initial_theta[0] + 1e-3*np.random.randn( nwalkers )
 	p0[:,1] 		= initial_theta[1] + 1e-3*np.random.randn( nwalkers )
 	p0[:,2] 		= initial_theta[2] + 1e-5*np.random.randn( nwalkers )
@@ -156,9 +146,6 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 	p0[:,5] 		= initial_theta[5] + 1e-3*np.random.randn( nwalkers )
 	p0[:,6] 		= initial_theta[6] + 1e-3*np.random.randn( nwalkers )
 	p0[:,7] 		= initial_theta[7] + 1e-3*np.random.randn( nwalkers )
-
-   
-
 	new_sampler, newpos, newprob, newstate = main( p0 , nwalkers , niter , ndim , ModelObj.lnprob , data , numRun )		
 	new_samples    = new_sampler.flatchain
 	sampler_lnprob = new_sampler.flatlnprobability
@@ -166,7 +153,6 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 	Fit_vals.append( new_theta_max )
 	whoamI = ylab[ samNo -1 ]
 	print( whoamI )
-
 	#====
 	'''
 	# Calculate Reproductve ratio
@@ -177,14 +163,11 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 	params, covariance = curve_fit( exponential_growth, xx[0:maxInd] , yy[0:maxInd] )
 	V0_fit, r_fit = params
 	estGrowthR0 = 1 + ( r_fit/initial_theta[4] )
-	print( "params-fit" , xx[0:maxInd] , yy[0:maxInd] , params , "R0:" ,r_fit  )
-	
+	print( "params-fit" , xx[0:maxInd] , yy[0:maxInd] , params , "R0:" ,r_fit  )	
 	tmpval = np.append( new_theta_max , r_fit  )
 	Fit_vals.append( tmpval )
-
 	sys.exit()
 	'''
-
 
 	# plot the parameter trace
 	plot_thetaHist( new_sampler  , numRun  , varNo )        
@@ -192,18 +175,17 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 	plt.plot( new_sampler.get_log_prob( flat=False )	 )
 	plt.savefig( OPATH_plots + 'LogProbScore_' + str(numRun) + '.pdf'  , dpi = 300 )
 
-
-
-	#np.savetxt( OPATH_files + 'Treated_Fit_' + str( numRun ) + '.csv', new_theta_max , delimiter='\t')
 	df2 = pd.DataFrame( Fit_vals , columns= ModelObj.labels )
 	df2.to_csv( OPATH_files + 'Treated_Fit_' + str( numRun ) + '.csv' )
-	print( df2.mean())
+	#print( df2.mean())
 
 
 
 
 def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip , datatype ):	
 
+	"""All the plotting functions invoked: Evolution of each population in ODE model, Corner plots for posterior distribution, parameter traces, histograms of
+	   of posterior distributions"""
 	new_samples    		=  new_sampler.flatchain
 	sampler_lnprob 		=  new_sampler.flatlnprobability
 	new_theta_max  		=  new_samples[np.argmax(sampler_lnprob)]
@@ -240,10 +222,7 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 
 	ax2.plot( new_best_fit_model.t , HealthyCells   , '-', c='k'  ,   markersize = 0.5  , label='T + Tt')
 	ax2.plot( new_best_fit_model.t , UnHealthyCells , '-',  c ='gray'    ,   markersize = 0.5  , label='I + Id')  
-
 	ax22.plot( new_best_fit_model.t , (TIPCells*100)/( HealthyCells + UnHealthyCells ) , '-',  c ='cornflowerblue'    ,    markersize = 0.5  , label='I + Id')   
-
-
 	if isCD4data:
 		cdData = ExpData.get_cd4dataInfant( datatype , ExpData.Animal2ExcludeInfant( datatype ))
 		ax2.scatter(  np.array( cdData.iloc[:,0] )*cFWk2Day , np.array( cdData.iloc[:,samNo] ) ,   c='gray' , linewidth = 1.2 )  
@@ -321,8 +300,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 		plt.plot( newFitC.t , v2RNA*( newFitC.y[2,:]+ newFitC.y[5,:] + newFitC.y[6,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT + V$_{H}$' )    
 	elif TIPModel == 4:
 		plt.plot( newFitC.t , v2RNA*( newFitC.y[2,:]+ newFitC.y[7,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VH' )    
-
-
 	plt.xlabel('Days' ) 
 	plt.ylabel('Gag RNA (copies/ml) ') 
 	plt.legend()
@@ -369,8 +346,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 		#plt.plot( newFitC2.t , v2RNA*( newFitC2.y[2,:]+ newFitC2.y[9,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT' )    
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[2,:],'r-' , alpha = 0.3 , markersize = 1 , label='SIV' )  
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[7,:],'b-' , alpha = 0.3 , markersize = 1 , label='TIP' )  
-
-
 	plt.xlabel('Days' ) 
 	plt.ylabel('Gag RNA (copies/ml) ') 
 	plt.legend()
@@ -384,10 +359,14 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 
 
 if __name__ == '__main__':
+	"""Reads in all the parameters-associated with simulation-system from the GlobalparaminfantPVL.py. 
+	   Extracts experimental data for PVL and TIP 
+	   Initiates MCMC module 
+	"""
 
 	datatype            = PARAM.datatype
 	varNo               = PARAM.varNo
-	TIPModel  	   		= PARAM.TIPModel      #1     # 1: 2003, 3: 2011
+	TIPModel  	   		= PARAM.TIPModel      
 	numBurn     		= PARAM.numBurn
 	niter       		= PARAM.niter   
 	yerr        		= PARAM.MLsigma
@@ -402,29 +381,19 @@ if __name__ == '__main__':
 	LOD_siv		   		= PARAM.LOD_siv
 	v2RNA 		   		= PARAM.v2RNA
 	TotalT0		   		= PARAM.TotalT0
-
-
 	ViralT0             = PARAM.ViralT0
-
 	OPATH_plots 		= sys.argv[3] 
-	OPATH_files 		= sys.argv[3] 
-	#======================      
+	OPATH_files 		= sys.argv[3]    
 	samNo  				= int( sys.argv[1] )
 	numRun 				= int( sys.argv[2] ) 
 	np.random.seed( numRun )
-	print("In Infant TIP PVL.....")
-	
+	print("Performing MCMC fits for Infant PVL.........")
 	# Reading data
 	AllDat = ExpData.get_dataInfantPVL(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )
- 
 	# TIP- data
 	TIPDat = []
 	if If_TIPDat:
-		TIPDat = ExpData.get_TIPdataInfant(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )
-	
+		TIPDat = ExpData.get_TIPdataInfant(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )	
 	# Run mcmc
 	ModelObj        = tipmodel1()
 	execute_mmc( ModelObj  , AllDat  ,  TIPDat ,  varNo , numRun , datatype )
-
-
-
