@@ -6,7 +6,6 @@
 %% ========================================================================
 
 function dY = TipmodelBioreactor( T , Y , PP )
-    % 
     lam = PP.lam;
     d   = PP.d;
     k   = PP.k;
