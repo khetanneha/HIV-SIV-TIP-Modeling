@@ -1,16 +1,12 @@
 
 
-# HIV-Therapeutic Interfering Particles ( TIPs )
+# Modeling HIV/SHIV-Therapeutic Interfering Particles ( TIPs )
 
-Raw data and code associated with "Engineered HIV deletion variants replicate 
-conditionally in non-human primates to reduce viral load and disease"
-
+Code and data associated with "Engineered HIV deletion variants replicate 
+conditionally in non-human primates to reduce viral load and disease" 
 Weinberger Lab @ Gladstone Institutes and UC San Francisco, San Francisco
 
 
-## Raw Data 
-* Scripts and files : plots in manuscript
-*  _In-vivo_ _Rhesus__macaques_data : PVL, TIP-DNA, CD4+ and Integrated-TIP
 
 
 ## Code
@@ -19,3 +15,6 @@ Weinberger Lab @ Gladstone Institutes and UC San Francisco, San Francisco
 3. Prediction of TIP efficacy in HIV-infected individuals
   
 
+## Raw Data 
+* Scripts and files : plots in manuscript
+*  _In-vivo_ _Rhesus__macaques_data : PVL, TIP-DNA, CD4+ and Integrated-TIP
