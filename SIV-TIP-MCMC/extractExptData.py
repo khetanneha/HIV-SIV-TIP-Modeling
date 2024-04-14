@@ -45,7 +45,7 @@ def get_TIPdataInfant( dataset , anim2ignore ):
 	else:
 		#tipInfo = pd.read_csv( './data/TIPGfpRNATreated-Mod.csv' , sep = ',' , skiprows= None, header = 0 )
 		#tipInfo = pd.read_csv( './data/SIV_GFP_TIP.csv' , sep = ',' , skiprows= None, header = 0 )
-		tipInfo = pd.read_csv( './data/newtipdata_v2.csv' , sep = ',' , skiprows= None, header = 0 )
+		tipInfo = pd.read_csv( './data/newtipdata.csv' , sep = ',' , skiprows= None, header = 0 )
 
 		print("Dataset in use: Treated")
 		if anim2ignore:
