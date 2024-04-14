@@ -3,23 +3,16 @@
 % HIV-TIP - Bioreactor modeling for design criterion for amplification
 % of spontaneously emerged DIPs in an evolutionary experimental scheme
 % Design criterion, conditions: This is used for TIP-HIV paper
-
 % Three different Experimental Scenarios hypothesized are simulated in-silico 
 % to predict the conditions that favor amplification , and establishment of DIPs
 % and the time-scales of these ...........................................
-
-clear global
-clc ; clf; close all;
-
-
-
 %% Experimenta set-up
 % BRsetup: 0 , 1 , 2
 % Case 0: Model 1: Serial-passage culturing
 % Case 1: Model 2: Non-dilutive reactor culturing of HIV 
 % Case 2: Model 2: Target-cell replenishment in reactor
 % ---------------------------------------------------------------------
-
+clear global; clc ; clf; close all;
 
 BRsetup = 1;
 switch ( BRsetup )
