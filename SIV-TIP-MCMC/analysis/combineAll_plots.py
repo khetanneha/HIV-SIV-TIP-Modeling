@@ -18,13 +18,11 @@ plt.rcParams['ytick.labelsize']=16
 plt.rc('legend', fontsize = 8 )
 plt.tight_layout()
 
-
 import compute_R0 as calR0
 import extractExptData as ExpData
 from GlobalparamInfantPVL import SysParam
 from tipmodel1_InfantPVL_A1 import tipmodel1
 PARAM = SysParam()
-
 
 def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype ):
 	"""Read in-all the MCMC chains across all the runs, sorts based on scores can select "TopN" or choose all

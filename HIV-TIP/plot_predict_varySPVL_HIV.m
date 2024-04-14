@@ -5,14 +5,11 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clearvars; clc; close all;
-
 ipath  = './out/';
-
 cc = [  240 , 128 , 128 ;
         100 , 149 , 237 ;
         143 , 188 , 143 ;
         120 , 120 , 120 ]./255;
-
 T1        =  365;       %65;
 T2        =  365*3;     % days
 ReqTimPts1          = [0:5:T1]-T1; ReqTimPts2 =[T1:5:T2]-T1;
@@ -26,14 +23,11 @@ f2 = load( [ ipath , 'LogVL_20_0.04_rhoScal3.out' ]);
 f3 = load( [ ipath , 'LogVL_30_0.02_rhoScal3.out' ]);
 f4 = load( [ ipath , 'LogVL_30_0.04_rhoScal3.out' ]);
 
-
 % 75 = 0; 78: Day 15; 99: 120 days
 VL1 = mean( f1 , 2) ;
 VL2 = mean( f2 , 2);
 VL3 = mean( f3 , 2);
 VL4 = mean( f4 , 2);
-
-
 
 % pre-TIP | day 15 | day 120 | Steady state-value
 SPVL  = round( [   VL1( 75 ) , VL2( 75 ) , VL3( 75  ) , VL4( 75 ) ]  , 2 );       
@@ -41,9 +35,6 @@ KinVL =  [         VL1( 75 ) , VL1( 78 ) , VL1( 99  ) ,  mean(  VL1( 78:99  ) );
                    VL2( 75 ) , VL2( 78 ) , VL2( 99  ) ,  mean(  VL2( 78:99  ) );
                    VL3( 75 ) , VL3( 78 ) , VL3( 99  ) ,  mean(  VL3( 78:99  ) );
                    VL4( 75 ) , VL4( 78 ) , VL4( 99  ) ,  mean(  VL4( 78:99  ) )];
-
-
-
 FH1=figure(1),...
     H1=plot( ReqdTim' , mean( f1 , 2) , 'color' , cc(1,:) , 'linewidth' ,4  ),hold on,...
     errorbar( ReqdTim' , mean( f1 , 2) , std( f1 , 0,  2) , 'linewidth' ,0.7 , 'lineStyle' ,'none' , 'color' , cc(1,:) ,'Marker' , 'none' ),...

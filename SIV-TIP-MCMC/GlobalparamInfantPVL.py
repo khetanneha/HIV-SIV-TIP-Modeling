@@ -9,7 +9,6 @@ TIP 6 : Cell division and growth
 TIP 7:  immature virions that do not infect: with and w/o feedback on infectivity 
 '''
 
-
 class SysParam:
 	"""Class for defining system parameters"""
 

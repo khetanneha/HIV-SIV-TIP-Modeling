@@ -8,7 +8,6 @@ opathPDp='./outA1M1/PDplots/'
 opathPDf='./outA1M1/PDfiles/'
 dattype='A1M1'
 
-
 for iS in $( eval echo "{1..$samNo}" )
 	do	
 		ipath="/Volumes/NKhd/V24/Jul10.23/dat_070423/A1M1/s${iS}/output/plots/"

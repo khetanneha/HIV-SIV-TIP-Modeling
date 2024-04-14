@@ -1,5 +1,6 @@
 '''
 Neha Khetan, 2022-2023
+computes R0 of wt-virus and TIP
 '''
 import numpy as np
 

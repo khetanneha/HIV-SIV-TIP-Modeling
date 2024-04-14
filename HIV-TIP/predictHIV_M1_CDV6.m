@@ -5,9 +5,7 @@
 %     2. for varying lambda/d -> for variable VLSP
 %     3. with cell-division
 %     4. Parameter-scan within scope of estimated range from patient estimates
-%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 clearvars, clc, clf, close all;
 saveinfo = 1;
@@ -18,12 +16,12 @@ set( groot ,'DefaultFigureVisible','on');
 % Fit-P and D params
 vldat = load( [ './' , 'AllPsAndDs.txt'] );
 vv    = unique( vldat , 'rows');
-vv    = [ round( 10.^vv(:,1), 2 ) , round( vv(:,2) ,2)  ];
-vv    = unique( vv , 'rows');
-% vv = [ 37.73 ,   0.037
+pdvals    = [ round( 10.^vv(:,1), 2 ) , round( vv(:,2) ,2)  ];
+tipvals    = unique( pdvals , 'rows');
+% tipvals = [ 37.73 ,   0.037
 %         61.82 ,   0.022]
 %% =======================================================================
-tipvals      = vv;
+tipvals      = tipvals;
 cc           = hsv(size( tipvals ,2 ));
 CFulml       = 10^3;
 

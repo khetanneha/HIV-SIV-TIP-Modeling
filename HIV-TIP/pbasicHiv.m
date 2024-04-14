@@ -1,6 +1,6 @@
 % Neha Khetan, Basic Viral dynamics model- Novak 1999
 % M. A. Nowak, R. M. May, Virus dynamics : mathematical principles of immunology and
-% virology. (Oxford University Press, Oxford ; New York, 2000).
+% virology. (Oxford University Press, Oxford ; New York, 2000)
 
 function dY = pbasicHiv( T , Y , PP )
     lam = PP.lam;

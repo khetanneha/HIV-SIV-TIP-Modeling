@@ -1,4 +1,3 @@
-
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Neha Khetan, Basic TIP model- Weinberger et al 2003
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,8 +10,6 @@ function dY = expandedHiv( T , Y , PP )
 % It : Y4 - Tip infected
 % Id : Y5 - HIV + TIP: dually infectd
 % Vt : Y6 - TIP-infected
-
-
 
 lam = PP.lam;
 d   = PP.d;

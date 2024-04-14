@@ -9,8 +9,6 @@ Usage:
 	python run_mcmc_infanttips.py AnimalNo NumIndependentRuns OutputFolder_plots OutputFolder_files
 '''
 
-
-
 import emcee
 import corner
 import sys
@@ -24,9 +22,6 @@ plt.rcParams['xtick.labelsize']=16
 plt.rcParams['ytick.labelsize']=16
 plt.rc('legend', fontsize = 8)
 plt.tight_layout()
-
-
-
 
 import extractExptData as ExpData
 import compute_R0 as calR0

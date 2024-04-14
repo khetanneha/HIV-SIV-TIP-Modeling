@@ -6,8 +6,6 @@ Read in data from csv files: untreated and TIP_treated animals
 import numpy as np
 import pandas as pd
 
-
-
 """Reads data from csv files for All animals: PVL ( ddPCT and qPCR ) , TIP-GFP (ddPCR) and Integrated-TIP, CD4+
 """
 

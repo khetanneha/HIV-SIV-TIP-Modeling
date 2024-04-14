@@ -18,7 +18,6 @@ opath 		  = sys.argv[2]
 nR    		  =	int( sys.argv[3] )
 nSamplePlot   = 2000 #sys.argv[4]
 
-
 for nfiles in range(  1, nR+1  ):	
 	filename            = ipath + "AllScore_A" + str( nfiles ) + ".csv"
 	#filename            = ipath + "AllScore_A5"  + ".csv"

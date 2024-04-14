@@ -5,7 +5,6 @@
    USAGE: 
    	poolanalysisnRuns.py SamNo NoRuns Ipath Opath NumIterations TopN """
 
-
 import numpy as np
 import pandas as pd
 import emcee

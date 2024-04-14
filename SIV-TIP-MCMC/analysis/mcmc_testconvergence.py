@@ -7,7 +7,6 @@
    USAGE: 
         mcmc_testconvergence.py Ipath Opathplots Opathfiles NumIterations samNum """
       
-
 import emcee
 import corner
 import sys
@@ -24,7 +23,6 @@ plt.rcParams['xtick.labelsize']=16
 plt.rcParams['ytick.labelsize']=16
 plt.rc('legend', fontsize = 8 )
 plt.tight_layout()
-
 
 ipath	= sys.argv[1] 
 opath   = sys.argv[2] 

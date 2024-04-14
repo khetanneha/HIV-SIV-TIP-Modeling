@@ -1,7 +1,7 @@
 '''
 Neha Khetan,
 Dec 2022 - Dec 2023,
-TIP-model	
+TIP-model:tipmodel1
 '''
 
 from scipy.integrate import solve_ivp
