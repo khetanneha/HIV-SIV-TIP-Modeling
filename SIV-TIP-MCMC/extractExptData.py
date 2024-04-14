@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 
 """Reads data from csv files for All animals: PVL ( ddPCT and qPCR ) , TIP-GFP (ddPCR) and Integrated-TIP, CD4+
+   Experiments @ OHSU and Weinberger Lab, 
+   Raw Files from Fathima, Pitchai
 """
 
 def get_dataAdult( dataset , anim2ignore ):
