@@ -1,6 +1,5 @@
 # MCMC
 
-
 Mathematical modeling of TIPs in SHIV-infected rhesus macaques using Bayesian inference with Markov chain Monte Carlo sampling.
 
 
