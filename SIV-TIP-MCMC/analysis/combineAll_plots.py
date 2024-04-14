@@ -1,7 +1,6 @@
 """Neha Khetan, Nov 2022-Dec 2023
    Post-MCMC runs to pool all the independent runs with "N" walkers in each
-   Ensemble statistis and plotting for the ensemble population
-
+   Ensemble statistis and plotting for the ensemble population as COMBINED PLOT
 """
 
 import numpy as np
@@ -20,25 +19,23 @@ plt.rc('legend', fontsize = 8 )
 plt.tight_layout()
 
 
-
-
-import extractExptData as ExpData
 import compute_R0 as calR0
+import extractExptData as ExpData
 from GlobalparamInfantPVL import SysParam
+from tipmodel1_InfantPVL_A1 import tipmodel1
 PARAM = SysParam()
 
 
-
-from tipmodel1_InfantPVL_A1 import tipmodel1
-
-
-
-
-
 def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype ):
+	"""Read in-all the MCMC chains across all the runs, sorts based on scores can select "TopN" or choose all
+	   solve ODE model for all animls
+	   Select the parameter set that satify "realistic biological criterion" and Ro-TIP > 1 and 
+	   and calculate statistics from population and use for plotting and o/p into files
+	   PLOTS - combined -OVERLAY FOR all animals
+	"""
+
 	colch = [ 'cornflowerblue', 'darkseagreen' ,'gray' , 'lightcoral']
 	for ii in range( 0, samNo ):
-
 		#  EXPT DATA
 		ylab    = AllDat.columns.values.tolist()[1:]
 		tmp 	 = AllDat.iloc[  : , [ 0, ii+1 ] ].dropna()  
@@ -48,8 +45,7 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		whoamI   = ylab[ samNo - 1]
 		print(" Data-ID" , whoamI )
 		# ===================== 
-		# Account for LOD:
-		
+		# Account for LOD:		
 		# VIRAL LOAD
 		if datatype =='control':
 			indx = yy[:] < LOD_siv
@@ -96,16 +92,10 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		sortedThetas = []
 		sortedScores = []
 		SuccessfulEvents = 0
-
 		ipath = ipath0 + './s' + str(ii +1) + '/output/plots/'
-		print( ipath )
-
-		print( "No. of steps:", numsteps )
 		for nfiles in range(  1 , nR +1   ):		
 			filename     = ipath + "back_" + str( nfiles ) + ".hdf5"
 			sampler      = emcee.backends.HDFBackend( filename  )
-		
-
 			# FILE EXISTS?
 			try:
 				tmp_samples     = sampler.get_chain(  discard=burnin , flat=False )
@@ -118,21 +108,15 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			except:
 				print("Skipping:", nfiles )
 				continue
-
-
 			if tmp_samples.shape[0] < numsteps:
 				continue
-
-
-
 			# If desired steps!
 			if SuccessfulEvents==0:
 				AllWalkers     		   = sampler.get_chain( discard=burnin , flat =False )
 				AllLogProb     		   = sampler.get_log_prob(discard=burnin, flat=False )
 				AllWalkers             = AllWalkers[0:numsteps,:,:]
 				AllLogProb             = AllLogProb[0:numsteps,:]
-				tmpVal 				   = select_topScores( AllWalkers , AllLogProb , TopN  )
-		
+				tmpVal 				   = select_topScores( AllWalkers , AllLogProb , TopN  )		
 				for tmpv in tmpVal:
 					FinalVal.append( tmpv )
 					
@@ -146,24 +130,16 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 					
 			SuccessfulEvents       = SuccessfulEvents + 1
 			if SuccessfulEvents > 100:
-				break
-
-				
+				break			
 		# =============================================================	
-		#print( type(FinalVal ))
 		# Sorting by scores - max to min
 		maxL 		   = sorted( FinalVal , key=lambda x: x[0] , reverse = True )
 		FinalVal 	   = maxL
-
 		#fineTime       = np.linspace( 0 , 365*2 , int(365*2/7.0)  )
 		fineTime        = eXY[:,0] #np.linspace( np.min( eXY[:,0] ) , np.max( eXY[:,0] ) , tot_timPt  )
-			
-
-
 		#------------------------------------
 		AllR0       = np.zeros( len(FinalVal)  )
 		AllRT       = np.zeros( len(FinalVal)  )
-			
 
 		AllCD4Cells = []
 		AllVL       = []
@@ -191,26 +167,19 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		ccmap = cmap( np.linspace( 0 , 1,  len(FinalVal) ) )
 		CF 	  = 10**(-3) # from mL to uL
 		cc 	  = 0
-		
-
 		tmpScore = 0
 		for ik in range( 0 , len( FinalVal ) ) :
 			THETA   = FinalVal[ik][1]
-			IV0     = MO.get_AllIV( )
-			
+			IV0     = MO.get_AllIV( )		
 		    # ==================================================
 			intgdTIP        = ExpData.get_dataInfantIntegratedTIP( datatype , ExpData.Animal2ExcludeInfant( datatype ) )
 			intgdTIPSam     = intgdTIP.iloc[  0 , samNo  ]		
 			# IC - 1 
 			#iv                   = MO.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=2.5*10**4 ,  TotalT0=PARAM.TotalT0 ) # 
 			#iv                   = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=0.5*eXY_tip[0,1] ,  TotalT0=TotalT0 ) # 
-			iv                    = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=intgdTIPSam ,  TotalT0=TotalT0 ) # 		
-
-			
-			
+			iv                    = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=intgdTIPSam ,  TotalT0=TotalT0 ) # 				
 			new_mdl =  MO.model( THETA ,  IV0  ,  fineTime )
-
-		
+	
 			if TIPModel == 1:
 				HealthyCells   = ( new_mdl.y[0,:] + new_mdl.y[3,:] )*CF
 				UnHealthyCells = ( new_mdl.y[1,:] + new_mdl.y[4,:] )*CF  
@@ -221,14 +190,11 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 				UnHealthyCells = ( new_mdl.y[1,:] + new_mdl.y[6,:] + new_mdl.y[7,:] + new_mdl.y[8,:] )*CF  
 				TIPCells       =  ( new_mdl.y[3,:] + new_mdl.y[4,:] + new_mdl.y[5,:] ) *CF
 			
-
-
 			TotalCD4       	   = ( HealthyCells + UnHealthyCells ) 
 			percentInfected    = ( UnHealthyCells/TotalCD4 )*100
 		
 			PerInfected[ik]    =  percentInfected[ -1 ]
 			EndTotalCD4[ik]    =  TotalCD4[ -1 ]
-
 
 			if TIPModel == 1:
 				vTotGag            =  v2RNA*( new_mdl.y[2,:] + new_mdl.y[5,:] )
@@ -239,7 +205,6 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 				vTotTIP            =  v2RNA*new_mdl.y[9,:] 			
 				vTotHIV            =  v2RNA*new_mdl.y[2,:]
 
-	
 			if ( (np.max( TotalCD4 ) < CutTotalCD4 )  and ( percentInfected[ -1 ] < CutOffPerInf ) and ( calR0.estimate_RTIP( THETA )>1) ):
 				#print( np.max( TotalCD4 ))
 				AllCD4Cells.append( TotalCD4 )
@@ -250,7 +215,6 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 				HHvir.append( new_mdl.y[2,:] )
 				TTvir.append( new_mdl.y[5,:] )
 				       
-
 				# ========================================================================================
 				AllR0[ik]         =  calR0.estimate_RR( THETA )   
 				AllRT[ik]         =  calR0.estimate_RTIP( THETA )   
@@ -258,9 +222,6 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 
 				t1 = np.array( FinalVal[ik][1] ).tolist()
 				OutData.append( [ FinalVal[ik][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5] ,  t1[6] , t1[7] ,    AllR0[ik] , PerInfected[ik] , EndTotalCD4[ik] ,  AllRT[ik] ])
-
-
-
 
 				if FinalVal[ik][0] < tmpScore:  
 
@@ -280,13 +241,8 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 
 					SelectData.append( [ FinalVal[ik][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5] , t1[6] , t1[7] ,   AllR0[ik] , PerInfected[ik] , EndTotalCD4[ik] ,  AllRT[ik] ])
 					tmpScore = FinalVal[ik][0]
-
-
 			cc = cc + 1
 		
-
-
-
 		# Plotting Confidence Interval
 		datMean , datL , datU , sdLow, sdUp = calMeanCILog( new_mdl.t ,  AllVL    )
 		f1000 = plt.figure( 1000 ,  figsize=( 6,4 ))	
@@ -300,7 +256,6 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		plt.ylabel('Log$_{10}$Gag-RNA copies/ml' ) 
 		plt.tight_layout()	
 		#plt.legend()
-
 		
 		# Plotting Confidence Interval
 		datMean , datL , datU , sdLow, sdUp= calMeanCILog( new_mdl.t , AllTIP    )
@@ -598,14 +553,8 @@ if __name__ == '__main__':
 	TopFitNum       = int( sys.argv[6] )
 
 
-
-
-
-
 	## Reading data
-	AllDat = ExpData.get_dataInfantPVL(    datatype , ExpData.Animal2ExcludeInfant( datatype ) ) 
-	
-
+	AllDat = ExpData.get_dataInfantPVL(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )
 
 	# TIP- data
 	TIPDat = []
