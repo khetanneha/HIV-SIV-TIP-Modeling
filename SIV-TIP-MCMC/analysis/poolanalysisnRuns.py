@@ -1,32 +1,25 @@
-'''
-July 2023
-Last Modified: 19 Nv. 2022
-Last Nodified: 6 Nov. 2022
-Pool different independent runs 
-USAGE: poolanalysisnRuns.py SamNo NoRuns Ipath Opath NumIterations TopN 
-'''
+"""Neha Khetan, 2023
+   Post-MCMC runs to pool all the independent runs with "N" walkers in each
+   Ensemble statistis and plotting for the ensemble population
 
+   USAGE: 
+   	poolanalysisnRuns.py SamNo NoRuns Ipath Opath NumIterations TopN """
 
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from scipy import integrate, optimize
-from scipy.integrate import solve_ivp
 import emcee
 import corner
 import sys
 import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy import integrate, optimize
+from scipy.integrate import solve_ivp
 plt.rcParams.update({'font.size': 18 })
 plt.rcParams['xtick.labelsize']=16
 plt.rcParams['ytick.labelsize']=16
 plt.rc('legend', fontsize = 8 )
 plt.tight_layout()
-
-
-
-
-
 
 import extractExptData as ExpData
 from GlobalparamInfantPVL import SysParam
@@ -36,13 +29,13 @@ from tipmodel1_InfantPVL_A1M1 import tipmodel1
 import compute_R0 as calR0
 
 
-
-
-
-
 def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype ):
-
-	RTIPChoiceVal = 1
+	"""Read in-all the MCMC chains across all the runs, sorts based on scores can select "TopN" or choose all
+	   solve ODE model
+	   Select the parameter set that satify "realistic biological criterion" and Ro-TIP > 1 and 
+	   and calculate statistics from population and use for plotting and o/p into files
+	"""
+	RTIPChoiceVal = 1  # Cutoff-value; select only parameter sets with RTIP > 1
 	# EXPT DATA
 	ylab    = AllDat.columns.values.tolist()[1:]
 	tmp 	 = AllDat.iloc[  : , [ 0, samNo ] ].dropna()  
@@ -57,7 +50,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		if (indx.any() ):
 			yy[ indx ] = LOD_siv
 		yy[0] = 2*ViralV0
-
 	else:
 		#print( backGrnd[0] , backGrnd[1] )
 		# For. start norm
@@ -77,18 +69,14 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		tmptip      = TIPDat.iloc[ : , [ 0, samNo ] ].dropna()  
 		tipBackGrnd = TIPDat.iloc[ 0 , [ 0, samNo ] ]
 		xtip  		= np.array( tmptip.iloc[ StartRow:,0 ] )*cFWk2Day
-		ytip  		= np.array( tmptip.iloc[ StartRow:,1 ] )
-			
+		ytip  		= np.array( tmptip.iloc[ StartRow:,1 ] )			
 		if ( tipBackGrnd[1] > 1.1 ):
 			#ytip[:] = ytip[:] - tipBackGrnd[1]
 			indx2   = ytip[:] < LOD_tip
 			if (indx2.any() ):
 				ytip[ indx2 ] = LOD_tip
-		#plt.semilogy( xtip , ytip )
-		#plt.show()
 		eXY_tip = np.column_stack( (xtip , ytip ))
 	# ==================================================================================================
-
 	AllWalkers = None
 	AllLogProb = None
 	AllScores  = []
@@ -96,14 +84,11 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	sortedThetas = []
 	sortedScores = []
 	SuccessfulEvents = 0
-
-
 	print( "No. of steps:", numsteps )
+
 	for nfiles in range(  1 , nR +1   ):		
 		filename     = ipath + "back_" + str( nfiles ) + ".hdf5"
 		sampler      = emcee.backends.HDFBackend( filename  )	
-
-
 		# FILE EXISTS
 		try:
 			tmp_samples     = sampler.get_chain(  discard=burnin , flat=False )
@@ -112,12 +97,9 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			tmp_logprob     = sampler.get_log_prob( discard=burnin, flat=False) 
 			tmp_logprob     = tmp_logprob[0:numsteps,:]
 			#print( nfiles , tmp_samples.shape[0])
-
 		except:
 			print("Skipping:", nfiles )
 			continue
-
-
 
 		if tmp_samples.shape[0] < numsteps:
 			continue
@@ -150,40 +132,24 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		SuccessfulEvents       = SuccessfulEvents + 1
 		if SuccessfulEvents > 500:
 			pass#break
-	
-
 	'''
 	===================================================================================================================
 	SCORES- Log-likelihood Scores
-
 	'''
 	AllScores = np.array( AllScores )	
 	newarr = np.empty( ( numsteps , 0 ) )
 	for ii in range( 0 , AllScores.shape[0] ):
 		tmp = AllScores[ ii , : , :]
 		newarr = np.hstack( ( newarr, np.array(tmp ) ) )
-	'''
-	print( newarr.shape )
-	print( AllScores[0,:,0] )
-	print( newarr[:,0])
-	'''
 	df_LogScore   =pd.DataFrame( newarr )
 	df_LogScore.to_csv( OPATH_files + 'AllScore_A' + str( samNo ) + '.csv' , float_format='%.2f' )
-
-	'''
-	===================================================================================================================
-	'''
-
-
 	
 	# Sorting by scores - max to min
 	maxL 		   = sorted( FinalVal , key=lambda x: x[0] , reverse = True )
 	FinalVal 	   = maxL
 	fineTime       = np.linspace( np.min( eXY[:,0] ) , np.max( eXY[:,0] ) , tot_timPt  )
-	#fineTime        = eXY[:,0] #np.linspace( np.min( eXY[:,0] ) , np.max( eXY[:,0] ) , tot_timPt  )
-		
-
-
+	#fineTime      = eXY[:,0] #np.linspace( np.min( eXY[:,0] ) , np.max( eXY[:,0] ) , tot_timPt  )
+	
 	#------------------------------------
 	AllR0       = np.zeros( len(FinalVal)  )
 	AllRT       = np.zeros( len(FinalVal)  )		
@@ -199,10 +165,7 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	SelectData 	= []
 	ALLT_TipCells =[]
 	ALLT_VirCells =[]
-
-	All_VirOnly = []
-
-
+	All_VirOnly   = []
 
 	f1 = plt.figure( 1 ,  figsize=( 6,4 ))
 	f2 = plt.figure( 2 ,  figsize=( 6,4 ))
@@ -226,19 +189,13 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 		intgdTIPSam     = intgdTIP.iloc[  0 , samNo  ]		
 
 		if PARAM.TIPModel == 11:
-			iv                  = ModelObj.set_AllIV(  V0=ViralT0 , VIM0=0 ,   TotalT0=PARAM.TotalT0 ) # 
+			iv                    = ModelObj.set_AllIV(  V0=ViralT0 , VIM0=0 ,   TotalT0=PARAM.TotalT0 ) # 
 		else:
-			# IC - 1 
-			#iv                   = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=2.5*10**4 ,  TotalT0=PARAM.TotalT0 ) # 
-			#iv                   = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=0.5*eXY_tip[0,1] ,  TotalT0=TotalT0 ) # 
 			iv                    = M0.set_AllIV(  V0=ViralV0 , VT0=0 , IT10=intgdTIPSam ,  TotalT0=PARAM.TotalT0 ) # 		
 
 
 		new_mdl =  M0.model( THETA , iv  ,  fineTime )
-		# Standard TIP-model
-
-
-		
+		# Standard TIP-model		
 		if PARAM.TIPModel == 1:
 			HealthyCells   = ( new_mdl.y[0,:] + new_mdl.y[3,:] )*CF
 			UnHealthyCells = ( new_mdl.y[1,:] + new_mdl.y[4,:] )*CF  
@@ -246,8 +203,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			vTotGag            =  V2RNA*( new_mdl.y[2,:] + new_mdl.y[5,:] )
 			vTotTIP            =  V2RNA*new_mdl.y[5,:]
 			vTotHIV            =  V2RNA*new_mdl.y[2,:]
-
-
 		# super-infection with m =3
 		elif PARAM.TIPModel == 3:
 			HealthyCells   = ( new_mdl.y[0,:] + new_mdl.y[3,:] + new_mdl.y[4,:] + new_mdl.y[5,:] )*CF
@@ -256,8 +211,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			vTotGag            =  v2RNA*( new_mdl.y[2,:] + new_mdl.y[9,:] )
 			vTotTIP            =  v2RNA*new_mdl.y[9,:] 			
 			vTotHIV            =  v2RNA*new_mdl.y[2,:]
-	
-
 		# Heterozygous model
 		elif PARAM.TIPModel == 5:
 			HealthyCells   = ( new_mdl.y[0,:] +  new_mdl.y[3,:]  )*CF
@@ -266,8 +219,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			vTotGag            =  v2RNA*( new_mdl.y[2,:] + new_mdl.y[5,:] + new_mdl.y[6,:]  )
 			vTotTIP            =  v2RNA*new_mdl.y[5,:] 			
 			vTotHIV            =  v2RNA*new_mdl.y[2,:]
-
-
 		# super-infection with m =2 
 		elif PARAM.TIPModel == 4:
 			HealthyCells   = ( new_mdl.y[0,:] + new_mdl.y[3,:] + new_mdl.y[4,:]  )*CF
@@ -276,7 +227,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			vTotGag            =  v2RNA*( new_mdl.y[2,:] + new_mdl.y[7,:] )
 			vTotTIP            =  v2RNA*new_mdl.y[7,:] 			
 			vTotHIV            =  v2RNA*new_mdl.y[2,:]
-
 		# Immature virions in Basic model ; can be due to AART model or "seeding-hypothesis" model - 4 equation
 		elif ( PARAM.TIPModel == 10 or PARAM.TIPModel == 11 ):
 			HealthyCells   = ( new_mdl.y[0,:] )*CF
@@ -285,10 +235,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 			vTotGag            =  v2RNA*( new_mdl.y[2,:] + new_mdl.y[3,:] )
 			vTotTIP            =  v2RNA*new_mdl.y[3,:] 			
 			vTotHIV            =  v2RNA*new_mdl.y[2,:]
-
-
-
-
 
 		TotalCD4       	    = ( HealthyCells + UnHealthyCells ) 
 		percentInfected     = ( UnHealthyCells/TotalCD4 )*100
@@ -299,8 +245,9 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 
 
 		if ( (np.max( TotalCD4 ) < CutTotalCD4 )  and ( percentInfected[ -1 ] < CutOffPerInf ) and ( calR0.estimate_RTIP( THETA )> RTIPChoiceVal ) ):
-			#print( np.max( TotalCD4 ))
+			"""Select the parameter set that satify "realistic biological criterion"""
 			if FinalVal[ik][0] < tmpScore:  
+				"""Choose unique parameter-set """
 				AllCD4Cells.append( TotalCD4 )
 				AllVL.append(  vTotGag )
 				AllTIP.append( vTotTIP )		
@@ -314,7 +261,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 
 				t1 = np.array( FinalVal[ik][1] ).tolist()
 				OutData.append( [ FinalVal[ik][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5] ,  t1[6] , t1[7] ,    AllR0[ik] , PerInfected[ik] , EndTotalCD4[ik] ,  AllRT[ik] ])
-
 
 				plt.figure( f1 )
 				plt.plot( new_mdl.t , vTotGag , 'o-',   c=ccmap[cc] ,   linewidth = 0.1 , alpha = 0.8 ,  markersize = 4 )  
@@ -330,9 +276,7 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 
 				SelectData.append( [ FinalVal[ik][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5] , t1[6] , t1[7] ,   AllR0[ik] , PerInfected[ik] , EndTotalCD4[ik] ,  AllRT[ik] ])
 				tmpScore = np.Inf#FinalVal[ik][0]
-
 			cc = cc + 1
-
 
 	## ========================================================================================================
 	AnimalMarker = [ 'o', '^' , 'v' , 's' , '*' ,'d']
@@ -354,22 +298,16 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	dfGag  = pd.DataFrame(  {'Column1': new_mdl.t , 'Column2': datMean , 'Column3': sdV })
 	dfGag.to_csv( OPATH_files + 'Total_GagA' + str( samNo ) + '.csv' )
 		
-
-
 	datMean , sdV = calMeanCILog( new_mdl.t ,  All_VirOnly   )
 	lowBV  = datMean - sdV
 	upBV   = datMean + sdV
 	lowBV[ lowBV < LOD_siv ] = LOD_siv
-
 	f1000         = plt.figure( 1000 ,  figsize=( 6,4 ))		
 	plt.fill_between( new_mdl.t, lowBV   , upBV , color = 'salmon' , alpha = 0.3  , label = whoamI )
 	plt.plot( new_mdl.t ,  datMean   ,   color = 'salmon' , linewidth=2 , label = 'fit')
 	dfVirOnly = pd.DataFrame(  {'Column1': new_mdl.t , 'Column2': datMean , 'Column3': sdV })
 	dfVirOnly.to_csv( OPATH_files + 'OnlyVIR_GagA' + str( samNo ) + '.csv' )
 	
-
-
-
 
 	# Plotting Confidence Interval
 	TIPdatMean ,  sdV= calMeanCItipLog( new_mdl.t , AllTIP    )
@@ -378,6 +316,7 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	lowBV[ lowBV < LOD_tip ] = LOD_tip
 	plt.fill_between( new_mdl.t, lowBV , upBV  , color = 'darkseagreen' , alpha = 0.3   )
 	plt.plot( new_mdl.t , TIPdatMean  , color = 'darkseagreen' , linewidth=2 )
+
 	if If_TIPDat:
 		plt.plot( eXY_tip[:,0] , ( eXY_tip[:,1] ) , marker = AnimalMarker[samNo]  , color=  'darkseagreen',   linewidth=0 , markersize=8 , alpha = 0.7 , markeredgecolor = 'k')
 	dfTGag  = pd.DataFrame(  {'Column1': new_mdl.t , 'Column2': TIPdatMean , 'Column3': sdV })
@@ -394,9 +333,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.savefig( OPATH_plots +'sdVL_both' + str( samNo )  + '.pdf' , dpi = 300 )
 	plt.close() 
 	
-
-
-
 	# Plotting Confidence Interval
 	datMean ,  sdV = calMeanCI( new_mdl.t ,  AllCD4Cells  )
 	f1000 = plt.figure( 1000 ,  figsize=( 6,4 ))
@@ -404,7 +340,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.plot( new_mdl.t , datMean , color = 'k' , alpha =0.1, linewidth=2 )
 	df_allCD4  = pd.DataFrame(  {'Column1': new_mdl.t , 'Column2': datMean , 'Column3': sdV })
 	df_allCD4.to_csv( OPATH_files + 'Only_CD4_A' + str( samNo ) + '.csv' )	
-
 
 	if isCD4data:
 		cdData = ExpData.get_cd4dataInfant( datatype , ExpData.Animal2ExcludeInfant( datatype ) )
@@ -452,12 +387,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.savefig( OPATH_plots +'perIntegrated_TIP_nVir_' + str( samNo ) + '.pdf' , dpi = 300 )
 	plt.close() 
 	
-
-
-
-
-
-
 	# =======================
 	plt.figure(1)
 	plt.plot( eXY[:,0] , eXY[:,1] , 'bo' , label=ylab[ samNo - 1] )
@@ -469,23 +398,12 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.savefig( OPATH_plots +'Fits_VL_S' + str( samNo ) + '.pdf' , dpi = 300 )
 	plt.close() 
 
-	'''
-	plt.figure(2)
-	plt.xlabel('Days' ) #,fontsize = 16)
-	plt.ylabel('CD4+ cells/uL' )
-	plt.legend()
-	plt.tight_layout()
-	#plt.savefig( OPATH_plots +'TopFits_CD4_' + str( samNo ) + '.pdf' , dpi = 300 )
-	plt.close() 
-	'''
 
 	plt.figure(3)
 	if isCD4data:
 		cdData = ExpData.get_cd4dataInfant( datatype , ExpData.Animal2ExcludeInfant( datatype ) )
 		cdxy   = ( cdData.iloc[:,[0 , samNo ]].dropna()  ) 
 		plt.plot(  np.array( cdxy.iloc[:,0] )*cFWk2Day , np.array( cdxy.iloc[:,1] ) , 'bo'   , label=ylab[ samNo - 1]  )  
-
-
 	plt.xlabel('Days' ) #,fontsize = 16)
 	plt.ylabel('CD4+ cells/uL' )
 	plt.legend()
@@ -501,7 +419,6 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.savefig( OPATH_plots +'PercentInfected_S' + str( samNo ) + '.pdf' , dpi = 300 )
 	plt.close() 
 
-
 	plt.figure(5)
 	if If_TIPDat:
 		plt.plot( eXY_tip[:,0] , eXY_tip[:,1] , 'bo-.')
@@ -512,63 +429,24 @@ def analysis( M0, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	plt.legend()
 	plt.savefig( OPATH_plots +'Fits_TIP_' + str( samNo ) + '.pdf' , dpi = 300 )
 	plt.close() 
-
-
-	#========================================
-	
-
-
-	# Calculate Reproductve ratio
-	# 0: Score
-	# 1: Thetas
-	# 2: R0
-	# 3: % Infected cells
-	#OutData    = [] 
-	#SelectData = []
-	'''
-	for ij in range( 0 , len( FinalVal ) ):
-		t1 = np.array( FinalVal[ij][1] ).tolist()
-
-		OutData.append( [ FinalVal[ij][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5] ,    AllR0[ij] , PerInfected[ij] , EndTotalCD4[ij] ])
- 
-		#if( PerInfected[ij] < CutOffPerInf ):
-		if (EndTotalCD4[ij] < CutTotalCD4 ):
-			SelectData.append( [ FinalVal[ij][0] , t1[0] , t1[1] ,t1[2] , t1[3] , t1[4] , t1[5]  , AllR0[ij] , PerInfected[ij] , EndTotalCD4[ij] ] )
-	'''
 	print( "Total files:......." , SuccessfulEvents )
 	print( "Saving the values into file....")
 	df2 			= pd.DataFrame(  OutData   , columns=[ 'Score' , 'Lam' , 'bet' , 'd' , 'k' , 'a' , 'c'  , 'D' , 'P' ,'R0' ,'PerInf' , 'TotCD4'  ,'RT'] )
 	df2.to_csv( OPATH_files + 'TIP_FitN_S' + str( samNo ) + '.csv' )
-
 	dfSelect        =	pd.DataFrame(  SelectData   , columns=[ 'Score' , 'Lam' , 'bet' , 'd' , 'k' , 'a' , 'c' , 'D' , 'P' , 'R0' ,'PerInf' ,  'TotCD4' ,'RT'] )
 	dfSelect.to_csv( OPATH_files + 'FilterTIP_FitN_S' + str( samNo ) + '.csv' )
 	print( "Plotting the stats....")
-	
-	# ALL
-	#plotHistFitStats( df2  , varNo , TopN  , fineTime  , eXY , datatype , 'All' )
-
-	
 	plotHistFitStats( dfSelect  , varNo , TopN  , fineTime , eXY , datatype ,  'Filter' )
-	# For all the pooled -walkers
 	plot_thetaHist( AllWalkers  , varNo , TopN , 'All' ) 
-	
-	#plot_MedCIpd( dfSelect )
-
-	
+	#plot_MedCIpd( dfSelect )	
 	return
-
-
-
-
 
 def select_topScores( allwalkers , alllogprob , topVals ):
 
 		flatAllWalkerChains = allwalkers.reshape(-1, allwalkers.shape[-1] )
-		flatAllLogProb      = alllogprob.flatten()
-		
+		flatAllLogProb      = alllogprob.flatten()		
 		tmpsortedThetas 	= flatAllWalkerChains[ np.argsort( flatAllLogProb )[::-1]] 
 		tmpsortedScores     = np.sort( flatAllLogProb )[::-1]
-
 		tmpVal = []
 		for i in range( 0 , topVals ):
 			tmpVal.append( [ tmpsortedScores[i] , tmpsortedThetas[i] ])
@@ -576,8 +454,7 @@ def select_topScores( allwalkers , alllogprob , topVals ):
 
 
 def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_type ):
-	#print( "....hi")
-	
+	"""Plot histogram of all fit-statistics"""
 	F_lam  = 	sam.loc[:,"Lam"]
 	F_beta =    sam.loc[:,"bet"]
 	F_k    =    sam.loc[:,"k"]
@@ -588,9 +465,7 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 	F_psi  =    sam.loc[:,"D"]
 	F_R0   =    sam.loc[:,"R0"]
 	F_RT   =    sam.loc[:,"RT"]
-
-	f100 , ax100 = plt.subplots(  varNo+2 , 1 , figsize=( 12 , 10 ) )
-	
+	f100 , ax100 = plt.subplots(  varNo+2 , 1 , figsize=( 12 , 10 ) )	
 	ax100[0].hist( F_lam  , bins =100,  density = True )
 	ax100[1].hist( F_beta , bins =100,  density = True )
 	ax100[2].hist( F_k    , bins =100,  density = True )
@@ -604,32 +479,23 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 	#plt.tight_layout() 
 	#plt.savefig( OPATH_plots + 'FlatHist_Param_S' + str( samNo ) + '_' + str( Sel_type ) +  '.pdf'  , dpi= 300  )
 	#plt.close()
-
 	'''
 	f10 = plt.figure( 10,  figsize=( 6,4 ))
 	sns.violinplot(data=sam[['Lam' , 'bet' ,  'k' ]], orient="V")
 	plt.tight_layout() 
 	plt.savefig( OPATH_plots + 'vioLog_S' + str( samNo ) + '_' + str( Sel_type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
-
-
 	f11 = plt.figure( 11, figsize=( 6,4 ))
 	sns.violinplot(data=sam[[ 'd' , 'a' , 'c']], orient="V")
 	plt.tight_layout() 
 	plt.savefig( OPATH_plots + 'vioRates'  + str( topVn ) + '_' + str( type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
-
-
 	'''
-
-
 	f12 = plt.figure(  12, figsize=( 6,4 ))
 	plt.hist( sam.loc[:,"Score"]  ,  density = True )
 	plt.tight_layout() 
 	plt.savefig( OPATH_plots + 'endScore_S' + str( samNo ) + '_' + str( Sel_type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
-
-
 
 	cmap  = plt.get_cmap("copper" )
 	cMAP  = cmap( np.linspace( 0 , 1,  len(sam.loc[:,"R0"])  ) )
@@ -642,7 +508,6 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 		plt.plot( sam.loc[ik,"R0"]  , sam.loc[ik,"PerInf"] , '*' , c=cMAP[cc] , markersize = 8 )
 		plt.figure(14)
 		plt.plot( sam.loc[ik,"R0"]  , sam.loc[ik,"RT"] , '*' , c=cMAP[cc] , markersize = 8 )
-
 		cc = cc + 1
 	plt.figure(13)
 	plt.xlabel('R0' ) 
@@ -664,27 +529,20 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 
 def plot_thetaHist( sam ,  varNo , topVals  , thetatype):
 	flatWalkers = sam.reshape(-1, sam.shape[-1])
-
 	f1 , ax1 = plt.subplots(  varNo , 1 , figsize=( 10 , 8 ) )
-	for fh in range( 0 , varNo ):
 
+	for fh in range( 0 , varNo ):
 		ax1[fh].plot( sam[:,:,fh] , color ="gray" , alpha = 0.1 )
 		ax1[fh].plot( np.mean(sam[:,:,fh], axis = 1 ) , color ="k" , alpha = 0.3 )
 	plt.tight_layout() 
 	plt.savefig( OPATH_plots + 'ThetaTraj_S' + str( samNo ) + '_' + str( thetatype ) + '.png'  , dpi= 150  )
-	plt.close()
-
-
-
-	
+	plt.close()	
 	# ============================================================
 	# CORNER PLOTS:
 	# ============================================================
 	f10    = plt.figure( figsize =(6,4) )
 	#labels = [ 'lam' , 'beta' , 'd', 'k' , 'a' , 'c' , 'D' , 'P' ]
 	labels = [ r"$\log \lambda$" , r"$\log$k"  , 'd' , r"$\log$n" , r"$\delta$"  , 'c' , 'D' , r"$\log P$"  ]
-
-
 	print( flatWalkers.shape )
 	flatWalkers = flatWalkers[ flatWalkers[:,6] < 0.2 ] 
 	print( flatWalkers.shape )
@@ -692,17 +550,9 @@ def plot_thetaHist( sam ,  varNo , topVals  , thetatype):
 	                                     plot_datapoints=False, fill_contours=True , plot_contours = 1, 
 	                                     quantiles= [0.16, 0.5, 0.84],
 	                                     title_fmt = '.2f' , labelpad = 0.2 ) 
-	# quantiles= [0.16, 0.5, 0.84] ,quantiles= [0.025, 0.5, 0.975] ,
 	plt.tight_layout()
 	plt.savefig( OPATH_plots + 'cornerTreated_S' + str( samNo ) + '_' + str( thetatype ) +  '.pdf'  , dpi = 300 )
 	plt.close()
-
-
-
-
-
-
-
 
 
 def compute_statistics(column):
@@ -712,22 +562,16 @@ def compute_statistics(column):
     return pd.Series([median, lower_bound, upper_bound], index=['Median', 'LB', 'UB'])
 
 
-
-
 def calMeanCILog(  tim , yVals ):
 	#print( "In cal Mean CI ")
 	yVals = np.array( yVals)
-
 	yVals[ yVals < LOD_siv ] = LOD_siv
 	sdNum   = 2
 	yVals   = yVals#np.nan_to_num( np.log10( yVals ) , neginf=0  )	
 	yMean   = np.mean( yVals , axis = 0 )
-
-
 	sd      = np.std(  yVals , axis = 0 )
 	sem     = sd/np.sqrt( len( yVals ) )
 	ci      = 1.96* sem
-
 	sdL     = yMean - ( sdNum*sd )
 	sdU     = yMean + ( sdNum*sd )
 	#print( 'ci:' , ci , 'sd:', sd )
@@ -737,20 +581,14 @@ def calMeanCILog(  tim , yVals ):
 def calMeanCItipLog(  tim , yVals ):
 	#print( "In cal Mean CI ")
 	yVals = np.array( yVals)
-
 	yVals[ yVals < LOD_tip] = LOD_tip
 	sdNum   = 2
-
 	yVals   = yVals#np.nan_to_num( np.log10( yVals ) , neginf=0  )	
 	yMean   = np.mean( yVals , axis = 0 )
-
 	sd      = np.std(  yVals , axis = 0 )
 	sem     = sd/np.sqrt( len( yVals ) )
-	ci      = 1.96* sem
-	
+	ci      = 1.96* sem	
 	return [ yMean, sd ] #sdNum*sd] # (yMean - ci ) , (yMean + ci ) , sdL , sdU ]
-
-
 
 def calMeanCI(  tim , yVals ):
 	#print( "In cal Mean CI ")
@@ -759,7 +597,6 @@ def calMeanCI(  tim , yVals ):
 	sd      = np.nanstd(  yVals , axis = 0 )
 	sem     = sd/np.sqrt( len( yVals ) )
 	ci      = sem #1.96* sem
-
 	sdL     = yMean - ( sdNum*sd )
 	sdU     = yMean + ( sdNum*sd )
 	#sdL[ sdL < 0] = LOD_siv
@@ -769,8 +606,6 @@ def calMedianCI(  tim , yVals ):
 	#print( "In cal Mean CI ")
 	sdNum   = 3
 	yMean   = np.nanmedian( yVals , axis = 0 )
-	
-
 	sdL     = np.nanpercentile( yVals , 2.5)
 	sdU     = np.nanpercentile( yVals , 97.5)
 	#sdL[ sdL < 0] = LOD_siv
@@ -785,7 +620,7 @@ if __name__ == '__main__':
 	global tot_timPt
 	global numBurn
 	global cFWk2Day
-	global StartRow    # 0 week should correspond to start
+	global StartRow    #   0 week should correspond to start
 	global LOD_siv
 	global LOD_tip
 	global OPATH_plots
@@ -796,20 +631,15 @@ if __name__ == '__main__':
 	global CutOffPerInf
 	global CutTotalCD4
 	global V2RNA
-
-
 	V2RNA 				= 2
 	If_TIPDat 			= 0
 	datatype            = 'treated'
 	isCD4data           = 1
-	varNo               = 8
-	
+	varNo               = 8	
 	if datatype == 'control':
 		StartRow    = 0
 	else:
 		StartRow    = 1
-
-
 	if datatype == 'control':
 		LOD_siv    = PARAM.LOD_siv
 	else:
@@ -817,16 +647,12 @@ if __name__ == '__main__':
 	LOD_tip        = LOD_siv #500    
 
 
-
 	cFWk2Day    	 	= 7
 	tot_timPt   		= 420 
 	burnin 				= 500
-
-
-
-
 	CutOffPerInf        = 100
 	CutTotalCD4         = 10000  # cells/uL
+
 
 	ipath  			= sys.argv[3]
 	OPATH_plots 	= sys.argv[4] #'./output/plots/'
@@ -838,25 +664,16 @@ if __name__ == '__main__':
 	ViralV0         = PARAM.ViralV0
 	ViralT0         = PARAM.ViralT0
 
-
-
-
-
 	## Reading data
 	AllDat = ExpData.get_dataInfantPVL(    datatype , ExpData.Animal2ExcludeInfant( datatype ) ) 
-	
-
-
 	# TIP- data
 	If_TIPDat = 1
 	TIPDat = []
 	if If_TIPDat:
 		TIPDat = ExpData.get_TIPdataInfant(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )
 		ylab  = TIPDat.columns.values.tolist()[1:]
-		#print( TIPDat )
 
-	## Run mcmc
+	#Run mcmc
 	#execute_mmc( AllDat  ,  varNo , numRun  )
 	ModelObj        = tipmodel1()
 	analysis( ModelObj , AllDat ,   TIPDat , totalRun , numsteps , burnin  , TopFitNum  , datatype )
-

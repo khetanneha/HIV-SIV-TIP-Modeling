@@ -1,19 +1,8 @@
-'''
-Last Modified: 19 Nv. 2022
-Last Nodified: 6 Nov. 2022
+"""Neha Khetan, Nov 2022-Dec 2023
+   Post-MCMC runs to pool all the independent runs with "N" walkers in each
+   Ensemble statistis and plotting for the ensemble population
 
-Sep - Oct, 2022
-
-1. Pool different independent runs 
-2. Pick the parameters from "top-best i.e. TopN " samples
-
-Input: filename.py SampleNo NumRuns
-
-
-USAGE: file.py SamNo NoRuns Ipath Opath NumIterations TopN 
-'''
-
-
+"""
 
 import numpy as np
 import pandas as pd
