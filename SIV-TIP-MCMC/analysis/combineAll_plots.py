@@ -344,29 +344,20 @@ def analysis( MO, AllDat , TIPDat ,  nR , numsteps ,  burnin  , TopN , datatype 
 	#plt.close() 
 	return
 
-
-
-
-
-
-
 def select_topScores( allwalkers , alllogprob , topVals ):
+	flatAllWalkerChains = allwalkers.reshape(-1, allwalkers.shape[-1] )
+	flatAllLogProb      = alllogprob.flatten()
 
-		flatAllWalkerChains = allwalkers.reshape(-1, allwalkers.shape[-1] )
-		flatAllLogProb      = alllogprob.flatten()
+	tmpsortedThetas 	= flatAllWalkerChains[ np.argsort( flatAllLogProb )[::-1]] 
+	tmpsortedScores     = np.sort( flatAllLogProb )[::-1]
 
-		tmpsortedThetas 	= flatAllWalkerChains[ np.argsort( flatAllLogProb )[::-1]] 
-		tmpsortedScores     = np.sort( flatAllLogProb )[::-1]
-
-		tmpVal = []
-		for i in range( 0 , topVals ):
-			tmpVal.append( [ tmpsortedScores[i] , tmpsortedThetas[i] ])
-		return tmpVal
+	tmpVal = []
+	for i in range( 0 , topVals ):
+		tmpVal.append( [ tmpsortedScores[i] , tmpsortedThetas[i] ])
+	return tmpVal
 
 
 def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_type ):
-	
-
 	F_lam  = 	sam.loc[:,"Lam"]
 	F_beta =    sam.loc[:,"bet"]
 	F_k    =    sam.loc[:,"k"]
@@ -408,8 +399,6 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 	plt.savefig( OPATH_plots + 'vioRates'  + str( topVn ) + '_' + str( type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
 	'''
-
-
 	f12 = plt.figure(  12, figsize=( 6,4 ))
 	plt.hist( sam.loc[:,"Score"]  ,  density = True )
 	plt.tight_layout() 
@@ -438,15 +427,12 @@ def plotHistFitStats( sam , varNo  , topVn , fineTime ,  eXY , datatype , Sel_ty
 	plt.savefig( OPATH_plots + 'R0-Inf_S' + str( samNo ) + '_' + str( Sel_type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
 
-
 	plt.figure(14)
 	plt.xlabel('R0' ) 
 	plt.ylabel('RT' )
 	plt.tight_layout() 
 	plt.savefig( OPATH_plots + 'R0-RT'  + str( samNo ) + '_' + str( Sel_type ) +  '.pdf'  , dpi= 300  )
 	plt.close()
-
-
 
 def plot_thetaHist( sam ,  varNo , topVals  , thetatype):
 	flatWalkers = sam.reshape(-1, sam.shape[-1])
@@ -529,29 +515,17 @@ if __name__ == '__main__':
 	samNo  				= int( sys.argv[1] )
 	numRun 				= int( sys.argv[2] ) 
 	np.random.seed( numRun )
-	print("In Infant TIP PVL.....")
-
-
-
-
-
 	ViralV0             = PARAM.ViralT0
 	burnin 				= 0
 	CutOffPerInf        = 100
 	CutTotalCD4         = 10000  # cells/uL
-
-
-
 	samNo     		= int( sys.argv[1] )
 	totalRun  		= int( sys.argv[2] ) 
-
 	ipath0  			= sys.argv[3]
 	OPATH_plots 	= sys.argv[4] #'./output/plots/'
 	OPATH_files 	= sys.argv[4] #'./output/files/'
-
 	numsteps  		= int( sys.argv[5] )
 	TopFitNum       = int( sys.argv[6] )
-
 
 	## Reading data
 	AllDat = ExpData.get_dataInfantPVL(    datatype , ExpData.Animal2ExcludeInfant( datatype ) )
