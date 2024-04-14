@@ -1,3 +1,5 @@
-# Prediction of TIP efficacy in HIV-infected individuals 
+# In-silico testing of therapeutic efficacy of HIV-TIP in HIV-infected individuals 
 
-corresponds to Fig. 5G
+
+* "plot_predict_varySPVL_HIV.m" corresponds to Fig. 5G
+* Folder: "out" contains the data-files
