@@ -11,10 +11,13 @@ TIP 7:  immature virions that do not infect: with and w/o feedback on infectivit
 
 
 class SysParam:
+	"""Class for defining system parameters"""
+
 	def __init__( self ):
-		"""Defines variables associated with experimenta-data type (i.e. SHIV infected only or SHIV infected + TIP-treated), system, method, and
-		   simulation parameters for MCMC runs, priors  and,
-		   simulation parameters for ODE model for TIP"""
+		"""Defines variables associated with experimenta-data type 
+				(i.e. SHIV infected only or SHIV infected + TIP-treated), system, method, and
+		   simulation parameters for MCMC runs, priors  etc., and,
+		   simulation parameters for ODE TIP-models"""
 		self.numBurn      =  50
 		self.niter        =  50		
 		self.TIPModel  	  =  1     
@@ -36,7 +39,7 @@ class SysParam:
 		self.HealthyDEATHSD = 0.005 
 		self.cSD            = 4
 		self.deltaSD        = 0.4     
-		self.gamma         = self.delta
+		self.gamma          = self.delta
 		self.h0            = 0.03
 		self.hmax          = 3.3*10**6
 		self.ViralV0      = 0.1 #0.5 #0.05

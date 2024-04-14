@@ -77,7 +77,7 @@ def plot_thetaHist( sam , numRun , varNo ):
 	
 
 def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
-	"""Prepares and execute  MCMC: 
+	"""Prepares and executes  MCMC: 
 		1. Prepares experiment data 
 		2. Initial conditions based on #1
 		3. Initialize parameter-guess sets for walkers
@@ -168,13 +168,11 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 	Fit_vals.append( tmpval )
 	sys.exit()
 	'''
-
 	# plot the parameter trace
 	plot_thetaHist( new_sampler  , numRun  , varNo )        
 	plot_traj( ModelObj ,   eXY , whoamI , new_sampler  , numRun , eXY_tip , datatype )
 	plt.plot( new_sampler.get_log_prob( flat=False )	 )
 	plt.savefig( OPATH_plots + 'LogProbScore_' + str(numRun) + '.pdf'  , dpi = 300 )
-
 	df2 = pd.DataFrame( Fit_vals , columns= ModelObj.labels )
 	df2.to_csv( OPATH_files + 'Treated_Fit_' + str( numRun ) + '.csv' )
 	#print( df2.mean())
@@ -184,7 +182,8 @@ def execute_mmc( ModelObj , AllDat , TIPDat , varNo , numRun , datatype ):
 
 def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip , datatype ):	
 
-	"""All the plotting functions invoked: Evolution of each population in ODE model, Corner plots for posterior distribution, parameter traces, histograms of
+	"""All the plotting functions invoked: Evolution of each population in ODE model, 
+	   Corner plots for posterior distribution, parameter traces, histograms of
 	   of posterior distributions"""
 	new_samples    		=  new_sampler.flatchain
 	sampler_lnprob 		=  new_sampler.flatlnprobability
@@ -223,6 +222,7 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	ax2.plot( new_best_fit_model.t , HealthyCells   , '-', c='k'  ,   markersize = 0.5  , label='T + Tt')
 	ax2.plot( new_best_fit_model.t , UnHealthyCells , '-',  c ='gray'    ,   markersize = 0.5  , label='I + Id')  
 	ax22.plot( new_best_fit_model.t , (TIPCells*100)/( HealthyCells + UnHealthyCells ) , '-',  c ='cornflowerblue'    ,    markersize = 0.5  , label='I + Id')   
+
 	if isCD4data:
 		cdData = ExpData.get_cd4dataInfant( datatype , ExpData.Animal2ExcludeInfant( datatype ))
 		ax2.scatter(  np.array( cdData.iloc[:,0] )*cFWk2Day , np.array( cdData.iloc[:,samNo] ) ,   c='gray' , linewidth = 1.2 )  
@@ -233,15 +233,13 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	plt.savefig( OPATH_plots +  'BestFit_CD4_TIP_' + str( numRun ) + '.pdf'  , dpi = 300 )
 	plt.close()   
 
-
-
-
 	# ============================================================
 	# VIRAL populations : V and VT
 	# ============================================================
 	f3   =  plt.figure( figsize=( 6 ,4 ) ) 
 	plt.yscale('log')
-	plt.plot( expXY[:,0] , expXY[:,1] , 'ko-.' ,  label= whoamI ,alpha = 0.8 , linewidth = 1.2 , markersize = 4 )  
+	plt.plot( expXY[:,0] , expXY[:,1] , 'ko-.' ,  label= whoamI ,alpha = 0.8 , linewidth = 1.2 , markersize = 4 ) 
+
 	if TIPModel == 1:
 		plt.plot( new_best_fit_model.t , v2RNA*new_best_fit_model.y[2,:],'r-' , alpha = 0.3 , markersize = 1 , label='SIV' )  
 		plt.plot( new_best_fit_model.t , v2RNA*new_best_fit_model.y[5,:],'b-' , alpha = 0.3 , markersize = 1 , label='TIP' )  
@@ -273,8 +271,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	elif TIPModel == 5:
 		plt.plot( newFitC.t , v2RNA*( newFitC.y[2,:]+ newFitC.y[5,:] + newFitC.y[6,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT+Vhh' )    
 
-
-
 	if If_TIPDat:
 		plt.plot( eXYtip[:,0] , eXYtip[:,1] , 'o-.' , color='green' , alpha = 0.5 ,   label= 'TIP-GFP' , linewidth = 1.2  , markersize = 3 )  	
 	plt.xlabel('Days' ) 
@@ -284,8 +280,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	plt.savefig(  OPATH_plots + 'BestFitVLs_Treated_' + str( numRun )  + '.pdf'  , dpi = 300 )
 	plt.close()
 	
-
-
 	f30   =  plt.figure( figsize=( 6 ,4 ) ) 
 	plt.yscale('log')
 	plt.plot( expXY[:,0] , expXY[:,1] , 'ko-.' ,  label= whoamI ,alpha = 0.8 , linewidth = 1.5 , markersize = 4 )  
@@ -307,7 +301,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	plt.savefig(  OPATH_plots + 'BestFitGAG_Treated_' + str( numRun )  + '.pdf'  , dpi = 300 )
 	plt.close()
 
-
 	# ============================================================
 	# CORNER PLOTS:
 	# ============================================================
@@ -318,7 +311,6 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	plt.savefig( OPATH_plots + 'cornerTreated_' + str( numRun ) + '.pdf'  , dpi = 300 )
 	plt.close()
 
-
 	f300   =  plt.figure( figsize=( 6 ,4 ) ) 
 	plt.yscale('log')
 	plt.plot( expXY[:,0] , expXY[:,1] , 'ko' ,  label= whoamI ,alpha = 0.6  , markersize = 2 )  
@@ -326,16 +318,17 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 
 	TimePredict = np.linspace( 0, 365*3 , int( (365*3) ) )
 	newFitC2 = ModelObj2.model( new_theta_max, iv, TimePredict )
+
 	if TIPModel == 1:
 		#plt.plot( newFitC2.t , v2RNA*( newFitC2.y[2,:]+ newFitC2.y[5,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT' )    
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[2,:],'r-' , alpha = 0.3 , markersize = 1 , label='SIV' )  
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[5,:],'b-' , alpha = 0.3 , markersize = 1 , label='TIP' )  
+
 	if TIPModel == 5:
 		#plt.plot( newFitC2.t , v2RNA*( newFitC2.y[2,:]+ newFitC2.y[5,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT' )    
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[2,:],'r-' , alpha = 0.3 , markersize = 1 , label='SIV' )  
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[5,:],'b-' , alpha = 0.3 , markersize = 1 , label='TIP' )  
 		plt.plot( newFitC2.t , v2RNA*newFitC2.y[6,:],'b-' , alpha = 0.3 , markersize = 1 , label='HH' )  
-
 
 	elif TIPModel == 3:
 		#plt.plot( newFitC2.t , v2RNA*( newFitC2.y[2,:]+ newFitC2.y[9,:] ), 'o-', color= 'gray' , alpha = 0.8 , markersize = 4 , label='V+VT' )    
@@ -353,14 +346,9 @@ def plot_traj(  ModelObj2 ,  expXY , whoamI  , new_sampler  , numRun  , eXYtip ,
 	plt.savefig(  OPATH_plots + 'PredictBestFitGAG_Treated_' + str( numRun )  + '.pdf'  , dpi = 300 )
 	plt.close()
 
-
-
-
-
-
 if __name__ == '__main__':
 	"""Reads in all the parameters-associated with simulation-system from the GlobalparaminfantPVL.py. 
-	   Extracts experimental data for PVL and TIP 
+	   Extracts experimental data for PVL and TIP : module:extractExptData.py
 	   Initiates MCMC module 
 	"""
 

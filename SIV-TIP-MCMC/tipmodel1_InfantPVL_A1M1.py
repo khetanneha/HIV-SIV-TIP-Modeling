@@ -14,9 +14,11 @@ PARAM = SysParam()
 
 
 class tipmodel1:
+	"""Class for TIP-model defines all the variables, parameters and model
+	   Sets up the mcmc-model """
+
 	def __init__( self ):
-		"""Define all the model-parameters and variables based on the TIP-model of choice
-		"""
+		"""Define all the model-parameters and variables based on the TIP-model of choice .."""
 
 		self.LOD_siv = PARAM.LOD_siv
 		self.v2RNA   = PARAM.v2RNA
@@ -64,7 +66,6 @@ class tipmodel1:
 		self.AllIV  =   [ self.T0 , self.I0 , self.V0 , self.It0 , self.Id0 , self.VT0 ]
 		return self.AllIV
 
-
 	def TIPmodel_ode( self, t , iv , par ):
 		"""ODE model for TIP: with populations:
 			T : Healthy T-cells
@@ -92,17 +93,12 @@ class tipmodel1:
 		VT_dt      =  ( (P**2) * D * n *(D *  delta ) *Id ) - ( c * VT )                    
 		return [ T_dt , I_dt , V_dt , It_dt , Id_dt , VT_dt ]
 
-
-
 	def model( self , theta , iv , x  ):
 		"""Solve ODE"""
 		ss = integrate.solve_ivp( self.TIPmodel_ode ,  ( x[0] , x[-1] )  , iv , args= (theta,)  , t_eval = x , method = "BDF" )
 		while( ss.success == 0 ):
 			ss = integrate.solve_ivp( self.TIPmodel_ode ,  ( x[0] , x[-1] )  , iv , args= (theta,)  , t_eval = x , method = "BDF" )
 		return ss
-
-
-
 
 	def lnlike( self , theta, x, y, yerr ):
 		"""Calculate Log-likelihood"""
@@ -119,10 +115,6 @@ class tipmodel1:
 		sum_measure = np.sum( ssd)/PARAM.MLsigma**2 
 		LnLike  	= -0.5*sum_measure -( 0.5*np.log( 2*np.pi*PARAM.MLsigma**2 )*len( yELog ) )
 		return LnLike
-
-
-
-
 
 	def lnprior( self , theta):
 		"""
@@ -163,9 +155,6 @@ class tipmodel1:
 		if not ( c7 and c8 and c1 and c2 and c3 and c4 and c5 and c6 and c9 and tot_c) :
 			return -np.inf
 		return tot_c
-
-
-
 
 	def lnprob( self , theta , x , y, yerr ):
 		"""computes log probablity for sampling"""
