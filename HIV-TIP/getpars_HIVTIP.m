@@ -1,5 +1,5 @@
 
-function PP = getpars_HIVTIP_CD()
+function PP = getpars_HIVTIP()
     PP        = {};
     PP.lam    = 30;
     PP.d      = 0.02;
@@ -10,6 +10,5 @@ function PP = getpars_HIVTIP_CD()
     PP.n      = 200;
     PP.D      = 0.4;
     PP.P      = 30; 
-    PP.h      = 0.004; %0.4
 end
 

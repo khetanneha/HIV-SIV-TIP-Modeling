@@ -33,7 +33,7 @@ ivE   = [ T0 ; I0 ; V0 ; It0  ; Id0 ; Vt0  ];
 pvaal     = getpars_HIVTIP( );
 tolval    = 1e-6;
 options1  = odeset('AbsTol', tolval  , 'RelTol', tolval  ,'Stats','off', 'InitialStep' , 10^-12  );
-sol       = ode23s( @( tval , yy2 ) expandedHiv2003( tval , yy2 , pvaal  )  , tval, ivE );
+sol       = ode23s( @( tval , yy2 ) expandedHiv( tval , yy2 , pvaal  )  , tval, ivE );
 
 
 figure(1),...
