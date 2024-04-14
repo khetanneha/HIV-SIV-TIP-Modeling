@@ -1,6 +1,6 @@
 
 
-# Modeling HIV/SHIV-Therapeutic Interfering Particles ( TIPs )
+# Modeling HIV/SHIV-Therapeutic Interfering Particles (TIPs)
 
 Code and data associated with "Engineered HIV deletion variants replicate 
 conditionally in non-human primates to reduce viral load and disease" 
