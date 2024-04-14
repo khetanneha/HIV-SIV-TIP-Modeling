@@ -1,20 +1,23 @@
 # HIV/SHIV-Therapeutic Interfering Particles ( TIPs )
 
-This repository contains the code and data associated with 
-work published as "Engineered HIV deletion variants replicate 
-conditionally in non-human primates to reduce viral load and disease" 
+This repository contains code and data associated with modeling of viral dynamics (Simian Immunodeficiency Virus and Human Immunodeficiency Virus), published as "_Engineered HIV deletion variants replicate 
+conditionally in non-human primates to reduce viral load and disease_" 
 @ Weinberger Lab in Gladstone Institutes and UC San Francisco, San Francisco
 
 
 
 
 ## Code
-This repository includes codes, and data files associated with:
-1. Mathematical models for bioreactor design for emergence and amplifcation of DIPs _in-vitro_ in [ HIV-Bioreactor ]
-2. Mathematical modeling of TIPs in vivo (rhesus macaque data)
-3. Prediction of TIP efficacy in HIV-infected individuals
-  
+1. "HIV-Bioreactor" : 
+    Mathematical models for bioreactor design requirements for emergence and amplifcation of DIPs _in-vitro_ in 
 
-## Raw Data 
-* Scripts and files : plots in manuscript
-*  _In-vivo_ _Rhesus__macaques_data : PVL, TIP-DNA, CD4+ and Integrated-TIP
+2. "SIV-TIP-MCMC"
+    Model parameterization by fitting virus-dynamics models to _in-vivo_ viral kinetics from _rhesus macaques_ using Bayesian inference with Markov chain Monte Carlo sampling. Also, scripts and data files for figures are included.
+
+
+3. "HIV-TIP"
+	Simulation files for testing the therapeutic efficacy of HIV-TIPs
+
+
+- Each folder included a readme file with further information
+- Contact: khetanneha@gmail.com
