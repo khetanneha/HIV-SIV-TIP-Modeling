@@ -7,8 +7,7 @@ import numpy as np
 import pandas as pd
 
 """Reads data from csv files for All animals: PVL ( ddPCT and qPCR ) , TIP-GFP (ddPCR) and Integrated-TIP, CD4+
-   Experiments @ OHSU and Weinberger Lab, 
-   Raw Files from Fathima Pitchai
+   Experiments @ OHSU and Weinberger Lab,  Raw Data files: Fathima Pitchai
 """
 
 def get_dataAdult( dataset , anim2ignore ):
@@ -43,8 +42,6 @@ def get_TIPdataInfant( dataset , anim2ignore ):
 		if anim2ignore:
 			tipInfo  = tipInfo.drop( anim2ignore , axis =1)
 	else:
-		#tipInfo = pd.read_csv( './data/TIPGfpRNATreated-Mod.csv' , sep = ',' , skiprows= None, header = 0 )
-		#tipInfo = pd.read_csv( './data/SIV_GFP_TIP.csv' , sep = ',' , skiprows= None, header = 0 )
 		tipInfo = pd.read_csv( './data/newtipdata.csv' , sep = ',' , skiprows= None, header = 0 )
 
 		print("Dataset in use: Treated")
@@ -69,13 +66,11 @@ def get_cd4dataInfant( datatype ,  anim2ignore ):
 def get_dataInfantPVL( dataset , anim2ignore ):
 	# Reading in the data , ignore if any data
 	if dataset == 'control':
-		#Ctr = pd.read_csv( './data/SIVGagRNAControl.csv' , sep = ',' , skiprows= None, header = 0 )
 		Ctr = pd.read_csv( './data/PVLInfant_CTR_10 TCID50.csv' , sep = ',' , skiprows= None, header = 0 )		
 		print("Dataset in use: Infant PVL control")
 		if anim2ignore:
 			Ctr   = Ctr.drop( anim2ignore , axis =1)
 	else:
-		#Ctr = pd.read_csv( './data/SIVGagTreated_LOD_500skip.csv' , sep = ',' , skiprows= None, header = 0 )
 		Ctr = pd.read_csv( './data/PVLInfant_TIP_10_TCID50.csv' , sep = ',' , skiprows= None, header = 0 )		
 		print("Dataset in use: Infant PVL Treated")
 		if anim2ignore:
@@ -109,13 +104,11 @@ def Animal2ExcludeInfant( dataset ):
 def get_dataInfantIntegratedTIP( dataset , anim2ignore ):
 	# Reading in the data , ignore if any data
 	if dataset == 'control':
-		#Ctr = pd.read_csv( './data/SIVGagRNAControl.csv' , sep = ',' , skiprows= None, header = 0 )
 		Ctr  = pd.read_csv( './data/PVLInfant_CTR_TIP.csv' , sep = ',' , skiprows= None, header = 0 )		
 		print("Dataset in use: Infant PVL control")
 		if anim2ignore:
 			Ctr   = Ctr.drop( anim2ignore , axis =1)
 	else:
-		#Ctr = pd.read_csv( './data/SIVGagTreated_LOD_500skip.csv' , sep = ',' , skiprows= None, header = 0 )
 		Ctr = pd.read_csv( './data/virTIP_Integrated.csv' , sep = ',' , skiprows= None, header = 0 )		
 		print("Dataset in use: Infant PVL Treated for ")
 		if anim2ignore:
