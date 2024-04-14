@@ -1,7 +1,6 @@
 # HIV/SHIV-Therapeutic Interfering Particles ( TIPs )
 
-This repository contains code and data associated with modeling of viral dynamics (Simian/Human Immunodeficiency Virus and Human Immunodeficiency Virus), submitted as "_Engineered HIV deletion variants replicate 
-conditionally in non-human primates to reduce viral load and disease_" 
+This repository contains code and data associated with modeling of viral dynamics (Simian/Human Immunodeficiency Virus and Human Immunodeficiency Virus) in submission
 @ Weinberger Lab in Gladstone Institutes and UC San Francisco, San Francisco
 
 
