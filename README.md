@@ -1,4 +1,4 @@
-# HIV/SHIV-Therapeutic Interfering Particles ( TIPs )
+# HIV-SIV-Therapeutic Interfering Particles ( TIPs )
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10970897.svg)](https://doi.org/10.5281/zenodo.10970897)
 
